@@ -12,7 +12,7 @@ app.set('port', (process.env.PORT || 5000));
 
 //init routes
 const dhtRoute = require('./route/dht');
-app.post('/dht', timeleaksRoute.post(repository));
+app.post('/dht', dhtRoute.post(repository));
 
 //start server
 app.listen(app.get('port'), function () {
