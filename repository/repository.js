@@ -10,7 +10,6 @@ function all () {
     dbx.filesListFolder({path: ''})
       .then(function(response) {
         let entries = response.entries;
-
         let files = _.map(_.filter(entries, function(item) { return item['.tag'] === 'file'}), function(f){return f.path_lower;});
         let folders = _.map(_.filter(entries, function(item) { return item['.tag'] === 'folder'}), function(f){return f.path_lower;});
 
@@ -52,7 +51,6 @@ function getFolderFiles(folder) {
     dbx.filesListFolder({path: folder})
         .then(function(response) {
             let files = _.map(_.filter(response.entries, function(item){return item['.tag'] === 'file'}), function(f){return f.path_lower});
-            console
             d.resolve(files);
         }).catch(function(error) {
               console.log(error);
@@ -84,7 +82,11 @@ function downloadFiles(files) {
 function downloadFile(file) {
     var d = Q.defer();
     dbx.filesDownload({path:file}).then(function(response){
-        d.resolve(response.fileBinary)
+        d.resolve({
+            content:response.fileBinary,
+            path: response.path_lower,
+            timestamp: response.client_modified
+        })
     }).catch(function(error) {
         console.log(error);
       });
