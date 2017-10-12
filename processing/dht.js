@@ -24,24 +24,38 @@ function fromFolder(path) {
 }
 
 function processItems (items) {
-    let temperature = []
-    let content = _.map(items, function (item) {
+    let avgTemperature = []
+    let avgHumidity = []
+    let labels = [];
+    _.forEach(items, function (item) {
         const data = JSON.parse(item.content);
-
-        const lines = _.map(data, function(line){
-            temperature.push(line.temperature)
-            return line.temperature + '\t' + line.humidity + '\t' + item.path + '\t' + item.timestamp
+        let temperature = []
+        let humidity = []
+        _.forEach(data, function(line){
+            temperature.push(line.temperature + 1)
+            humidity.push(line.humidity - 1)
         });
-        return lines.join('\n')
+        avgTemperature.push(_.mean(temperature));
+        avgHumidity.push(_.mean(humidity));
+        labels.push(item.timestamp)
     });
 
-    temperature = _.take(temperature, 10)
     chart.draw({
             type: 'line',
             data: {
-                datasets: [ {
+                labels: labels,
+                datasets: [
+                    {
                         label: "Температура",
-                        data: temperature
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        data: avgTemperature,
+                        fill: false
+                    },
+                    {
+                        label: "Влажность",
+                        backgroundColor: 'rgb(155, 199, 132)',
+                        data: avgHumidity,
+                        fill: false
                     }
                 ]
             },
@@ -49,7 +63,7 @@ function processItems (items) {
                 responsive: false,
                 title:{
                     display: true,
-                    text:'График температуры'
+                    text:'График температуры и влажности'
                 },
                 scales: {
                     xAxes: [{
@@ -63,17 +77,13 @@ function processItems (items) {
                         display: true,
                         scaleLabel: {
                             display: true,
-                            labelString: 'Температура'
+                            labelString: 'Значение'
                         }
                     }]
                 }
             }
         })
 
-
-    const toFile = content.join('\n');
-    fs.writeFile('dht_content', toFile);
-    return toFile
 }
 
 
