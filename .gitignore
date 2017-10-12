@@ -4,3 +4,6 @@ node_modules
 *_content
 *.zip
 *.png
+boot_*.py
+boot.py
+!*booter.py
