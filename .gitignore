@@ -7,3 +7,4 @@ node_modules
 boot_*.py
 boot.py
 !*booter.py
+NodeMCU

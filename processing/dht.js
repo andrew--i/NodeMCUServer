@@ -24,68 +24,85 @@ function fromFolder(path) {
 }
 
 function processItems (items) {
-    let avgTemperature = []
-    let avgHumidity = []
-    let labels = [];
+    let sensorData = {};
     _.forEach(items, function (item) {
         const data = JSON.parse(item.content);
-        let temperature = []
-        let humidity = []
         _.forEach(data, function(line){
-            temperature.push(line.temperature + 1)
-            humidity.push(line.humidity - 1)
+            if (!sensorData[line.dht])
+                sensorData[line.dht] = [];
+            let measures = sensorData[line.dht];
+            var timestamp = new Date(line.timestamp);
+            measures.push({
+                temperature: line.temperature,
+                humidity: line.humidity,
+                timestamp: line.timestamp,
+                date: timestamp,
+                time: timestamp.getTime()
+            })
         });
-        avgTemperature.push(_.mean(temperature));
-        avgHumidity.push(_.mean(humidity));
-        labels.push(item.timestamp)
     });
 
-    chart.draw({
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: "Температура",
-                        backgroundColor: 'rgb(255, 99, 132)',
-                        data: avgTemperature,
-                        fill: false
+
+    for (var sensorId in sensorData) {
+        let datasets = [];
+        var data = sensorData[sensorId];
+        var sortedData = _.orderBy(data, ['time'], ['desc'])
+
+        let dataset = {
+            label: 'Температура датчика ' + sensorId,
+            backgroundColor: 'rgb(' + Math.floor(Math.random()*255) + ',' + Math.floor(Math.random()*255) + ',' + Math.floor(Math.random()*255) + ')',
+            data: _.map(sortedData, item => item.temperature),
+            fill: false
+        };
+
+        datasets.push(dataset);
+
+        dataset = {
+                    label: 'Влажность датчика ' + sensorId,
+                    backgroundColor: 'rgb(' + Math.floor(Math.random()*255) + ',' + Math.floor(Math.random()*255) + ',' + Math.floor(Math.random()*255) + ')',
+                    data: _.map(sortedData, item => item.humidity),
+                    fill: false,
+                    labels: _.map(sortedData, d => d.timestamp)
+                };
+
+        datasets.push(dataset);
+
+        chart.draw({
+                    type: 'line',
+                    data: {
+                        labels: _.map(sortedData, i => i.timestamp),
+                        datasets: datasets
                     },
-                    {
-                        label: "Влажность",
-                        backgroundColor: 'rgb(155, 199, 132)',
-                        data: avgHumidity,
-                        fill: false
+                    options: {
+                        responsive: false,
+                        title:{
+                            display: true,
+                            text:'График температуры и влажности'
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Время'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Значение'
+                                }
+                            }]
+                        }
                     }
-                ]
-            },
-            options: {
-                responsive: false,
-                title:{
-                    display: true,
-                    text:'График температуры и влажности'
-                },
-                scales: {
-                    xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Время'
-                        }
-                    }],
-                    yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Значение'
-                        }
-                    }]
-                }
-            }
-        })
+                }, 'dht_' + sensorId + '.png')
+    }
+
+
 
 }
 
 
-fromFolder('./NodeMCU/2017-10-11')
+fromFolder('./NodeMCU/2017-10-13')
 
