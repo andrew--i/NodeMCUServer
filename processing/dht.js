@@ -104,5 +104,5 @@ function processItems (items) {
 }
 
 
-fromFolder('./NodeMCU/2017-10-13')
+fromFolder('./2017-10-24')
 
