@@ -11,7 +11,7 @@ module.exports = {
             }
 
             let block = request.body;
-            block.timestamp = repository.getCurrentDate().toISOString();
+            block.timestamp = repository.getCurrentDate().toISOString().replace('Z','');
             blocks.push(block);
 
             response.sendStatus(200);
