@@ -13,7 +13,7 @@ app.set('port', (process.env.PORT || 9999));
 //init routes
 const dhtRoute = require('./route/dht');
 app.post('/dht', dhtRoute.post(repository));
-app.get('/time', (req, res) => res.send(new Date().getTime()));
+app.get('/time', (req, res) => res.send('' + new Date().getTime()));
 
 //start server
 app.listen(app.get('port'), function () {
