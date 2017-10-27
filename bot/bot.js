@@ -40,12 +40,16 @@ function sendSelectPeriodMessage(chatId) {
     })
 }
 
+function normalizeNum(num) {
+    if (num.length < 2)
+        return '0' + month;
+    return num + '';
+}
+
 function formatDate(str) {
     let date = new Date(str);
-    let month = (date.getMonth() + 1) + '';
-    if (month.length < 2)
-        month = '0' + month;
-    return [date.getDate(), month, date.getFullYear()].join('-') + ' ' + [date.getHours(), date.getMinutes(), date.getSeconds()].join(':')
+    return [date.getDate(), date.getMonth() + 1, date.getFullYear()].map(i => normalizeNum(i)).join('-') + ' ' +
+        [date.getHours(), date.getMinutes(), date.getSeconds()].map(i => normalizeNum(i)).join(':')
 }
 
 module.exports = function (repository) {
