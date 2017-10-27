@@ -158,5 +158,6 @@ function lastDHT() {
 module.exports = {
     all: all,
     save: save,
-    getDHT: getDHT
+    getDHT: getDHT,
+    getCurrentDate: getCurrentDate
 };

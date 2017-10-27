@@ -10,7 +10,9 @@ module.exports = {
                 blocks = [];
             }
 
-            blocks.push(request.body);
+            let block = request.body;
+            block.timestamp = repository.getCurrentDate().toISOString();
+            blocks.push(block);
 
             response.sendStatus(200);
         }
