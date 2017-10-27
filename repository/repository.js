@@ -37,7 +37,8 @@ function guid() {
 }
 
 function save(item) {
-    dbx.filesUpload({ contents: JSON.stringify(item), path: '/' + new Date().toISOString().split('T')[0] + '/'+guid()+'.json'})
+    let date = new Date(new Date().getTime() + 1000*60*60*3);
+    dbx.filesUpload({ contents: JSON.stringify(item), path: '/' + date.toISOString().split('T')[0] + '/'+guid()+'.json'})
     .then(function(response) {
         console.log(response);
     }).catch(function(error) {
