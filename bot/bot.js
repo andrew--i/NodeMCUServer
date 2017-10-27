@@ -41,8 +41,8 @@ function sendSelectPeriodMessage(chatId) {
 }
 
 function normalizeNum(num) {
-    if (num.length < 2)
-        return '0' + month;
+    if (num < 10)
+        return '0' + num;
     return num + '';
 }
 
