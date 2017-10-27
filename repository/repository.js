@@ -46,7 +46,7 @@ function guid() {
 }
 
 function save(item) {
-    dbx.filesUpload({contents: JSON.stringify(item), path: getCurrentFolder() + guid() + '.json'})
+    dbx.filesUpload({contents: JSON.stringify(item), path: getCurrentFolder() + '/' + guid() + '.json'})
         .then(function (response) {
             console.log(response);
         }).catch(function (error) {
