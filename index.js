@@ -10,7 +10,7 @@ app.use(morgan('short'));
 //setup port
 app.set('port', (process.env.PORT || 9999));
 
-// const bot = require('./bot/bot')(repository);
+const bot = require('./bot/bot')(repository);
 const chartRoute = require('./route/chartRoute');
 
 //init routes
