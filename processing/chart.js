@@ -30,6 +30,7 @@ module.exports = {
             Chartjs.defaults.global.defaultFontSize = 16;
             Chartjs.defaults.global.defaultFontStyle = 'bold';
 
+
             //Chartjs.defaults
             //Chartjs.pluginService
             //Chartjs.scaleService

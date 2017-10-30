@@ -134,12 +134,36 @@ function getBarChartData(data) {
 
     chartData = [];
 
+    let chartOptions = {
+        plugins: {
+            afterDraw: function (chart, easing) {
+                let self = chart.config;
+
+                const chartInstance = chart.chart;
+                let ctx = chartInstance.ctx;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = "rgba(0, 0, 0, 1)";
+                ctx.textBaseline = 'bottom';
+
+                self.data.datasets.forEach(function (dataset, i) {
+                    let meta = chartInstance.controller.getDatasetMeta(i);
+                    meta.data.forEach(function (bar, index) {
+                        let data = dataset.data[index];
+                        ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                    });
+                });
+
+            }
+        },
+        responsive: true
+    };
+
     chartData.push({
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                data:temps,
+                data: temps,
                 label: 'График температуры',
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
@@ -155,13 +179,7 @@ function getBarChartData(data) {
                 borderWidth: 1
             }]
         },
-        options: {
-            responsive: false,
-            scales: {
-                yAxes: [{ticks: {mirror: true}}]
-            }
-        }
-
+        options: chartOptions
     });
 
 
@@ -170,7 +188,7 @@ function getBarChartData(data) {
         data: {
             labels: labels,
             datasets: [{
-                data:hums,
+                data: hums,
                 label: 'График Влажности',
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
@@ -186,13 +204,7 @@ function getBarChartData(data) {
                 borderWidth: 1
             }]
         },
-        options: {
-            responsive: false,
-            scales: {
-                yAxes: [{ticks: {mirror: true}}]
-            }
-        }
-
+        options: chartOptions
     });
 
     return chartData;
