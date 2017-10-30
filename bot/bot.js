@@ -24,7 +24,7 @@ let period2 = {id: 5, name: "За день"};
 let period3 = {id: 6, name: "За неделю"};
 let period4 = {id: 7, name: "За месяц"};
 
-let periods = [period1, period2, period3, period4];
+let periods = [period2, period3, period4];
 
 function sendInitMessage(chatId) {
     bot.sendMessage(chatId, 'Можно узнать погоду в бане', {
