@@ -158,56 +158,35 @@ function getBarChartData(data) {
         responsive: true
     };
 
-    chartData.push({
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: temps,
-                label: 'График температуры',
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)'
+    let ctx = [
+        {label: 'График Температуры', data: temps},
+        {label: 'График Влажности', data: hums}];
 
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: chartOptions
+    return _.map(ctx, c => {
+        return {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: c.data,
+                    label: c.label,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)'
+
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: chartOptions
+        };
     });
-
-
-    chartData.push({
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: hums,
-                label: 'График Влажности',
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)'
-
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: chartOptions
-    });
-
-    return chartData;
 }
 
 
