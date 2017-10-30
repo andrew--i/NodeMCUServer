@@ -10,12 +10,14 @@ app.use(morgan('short'));
 //setup port
 app.set('port', (process.env.PORT || 9999));
 
-const bot = require('./bot/bot')(repository);
+// const bot = require('./bot/bot')(repository);
+const chartRoute = require('./route/chartRoute');
 
 //init routes
 const dhtRoute = require('./route/dht');
 app.post('/dht', dhtRoute.post(repository));
 app.get('/dht', dhtRoute.get(repository));
+app.get('/chart', chartRoute.get(repository));
 
 //start server
 app.listen(app.get('port'), function () {

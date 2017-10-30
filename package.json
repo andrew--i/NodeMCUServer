@@ -1,5 +1,5 @@
 {
-  "name": "nodemcu backend",
+  "name": "nodemcu_backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -20,6 +20,7 @@
     "lodash": "^4.17.4",
     "morgan": "^1.8.2",
     "node-telegram-bot-api": "^0.29.0",
+    "plotly": "^1.0.6",
     "q": "^1.5.0"
   },
   "author": "a--i",
