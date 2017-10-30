@@ -62,8 +62,8 @@ module.exports = function (repository) {
             let place = _.find(places, p => p.name === msg.text);
             if (place) {
                 if (place.id === place0.id) {
-                    let dht = repository.getDHT();
-                    dht.then(r => {
+                    let currentDHT = repository.getDHT();
+                    currentDHT.then(r => {
                         let time = formatDate(r.timestamp);
                         let chartsData = dht.getBarChartData(r.data);
 

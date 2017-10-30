@@ -124,10 +124,11 @@ function getBarChartData(data) {
     let labels = [];
     let temps = [];
     let hums = [];
+
     for (let pin in pins) {
-        let pData = _.find(data, d => d.dht === pin);
-        temps.push(pData.t);
-        hums.push(pData.h);
+        let pData = _.find(data, d => d.dht === parseInt(pin));
+        temps.push(parseFloat(pData.t));
+        hums.push(parseFloat(pData.h));
         labels.push(pins[pin]);
     }
 
@@ -137,14 +138,25 @@ function getBarChartData(data) {
         type: 'bar',
         data: {
             labels: labels,
-            datasets: temps
+            datasets: [{
+                data:temps,
+                label: 'График температуры',
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
         },
         options: {
             responsive: false,
-            title: {
-                display: true,
-                text: 'График температуры'
-            },
             scales: {
                 xAxes: [{
                     display: true,
@@ -170,30 +182,25 @@ function getBarChartData(data) {
         type: 'bar',
         data: {
             labels: labels,
-            datasets: hums
+            datasets: [{
+                data:hums,
+                label: 'График Влажности',
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
         },
         options: {
-            responsive: false,
-            title: {
-                display: true,
-                text: 'График Влажности'
-            },
-            scales: {
-                xAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Место'
-                    }
-                }],
-                yAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Значение'
-                    }
-                }]
-            }
+            responsive: false
         }
 
     });
