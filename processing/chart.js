@@ -21,5 +21,16 @@ module.exports = {
                 chartNode.destroy();
                 return result;
             });
+    },
+
+    buffer: function (chartJsOptions) {
+        let chartNode = new ChartjsNode(2600, 600);
+
+        return chartNode.drawChart(chartJsOptions)
+            .then(() => {
+                let result = chartNode.getImageBuffer('image/png');
+                chartNode.destroy();
+                return result;
+            });
     }
 }

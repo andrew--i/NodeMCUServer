@@ -83,8 +83,8 @@ module.exports = function (repository) {
                                 })
                             } else {
                                 dht.getChartData().then(r => {
-                                    chart.stream(r[0]).then(i => {
-                                        bot.sendPhoto(chatId, i.stream, {caption: 'График'})
+                                    chart.buffer(r[0]).then(i => {
+                                        bot.sendPhoto(chatId, i, {caption: 'График'})
                                     })
                                 });
                             }
