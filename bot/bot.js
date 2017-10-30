@@ -2,6 +2,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, {polling: true});
 const _ = require('lodash');
+const dht = require('../processing/dht');
+const chart = require('../processing/chart');
 
 const usernames = JSON.parse(process.env.TELEGRAM_USERNAMES);
 
@@ -71,13 +73,21 @@ module.exports = function (repository) {
                             sendInitMessage(chatId);
                         else {
                             let p = userSelectPlace[msg.from.username];
-                            let dht = repository.getDHT();
-                            dht.then(r => {
-                                let time = formatDate(r.timestamp);
-                                let temp = _.find(r.data, d => d.dht === p.pin);
-                                bot.sendMessage(chatId, 'Данные на ' + time + '\r\n' + p.name + ', ' + period.name + ': температура ' + temp.t + ', влажность ' + temp.h);
+                            if (period.id === period1.id) {
+                                let dht = repository.getDHT();
+                                dht.then(r => {
+                                    let time = formatDate(r.timestamp);
+                                    let temp = _.find(r.data, d => d.dht === p.pin);
+                                    bot.sendMessage(chatId, 'Данные на ' + time + '\r\n' + p.name + ', ' + period.name + ': температура ' + temp.t + ', влажность ' + temp.h);
 
-                            })
+                                })
+                            } else {
+                                dht.getChartData().then(r => {
+                                    chart.stream(r[0]).then(i => {
+                                        bot.sendPhoto(chatId, i.stream, {caption: 'График'})
+                                    })
+                                });
+                            }
                         }
 
                     } else {

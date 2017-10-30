@@ -2,7 +2,14 @@ const repository = require('../repository/repository');
 const fs = require('fs');
 const _ = require('lodash');
 const Q = require('q');
-const chart = require('./chart.js')
+
+const pins =
+    {
+        14: "Улица",
+        12: "Тамбур",
+        13: "Нагреватель"
+    };
+
 
 function fromRepository() {
     let defer = Q.defer();
@@ -58,7 +65,7 @@ function processItems(items) {
         let sortedData = _.orderBy(data, ['time']);
 
         let dataset = {
-            label: 'Температура датчика ' + sensorId,
+            label: 'Температура датчика ' + pins[sensorId],
             backgroundColor: 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')',
             data: _.map(sortedData, item => item.temperature),
             fill: false
