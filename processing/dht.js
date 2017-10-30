@@ -158,20 +158,7 @@ function getBarChartData(data) {
         options: {
             responsive: false,
             scales: {
-                xAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Место'
-                    }
-                }],
-                yAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Значение'
-                    }
-                }]
+                yAxes: [{ticks: {mirror: true}}]
             }
         }
 
@@ -200,7 +187,10 @@ function getBarChartData(data) {
             }]
         },
         options: {
-            responsive: false
+            responsive: false,
+            scales: {
+                yAxes: [{ticks: {mirror: true}}]
+            }
         }
 
     });
