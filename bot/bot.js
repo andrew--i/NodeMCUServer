@@ -14,12 +14,12 @@ function isValidMessage(message) {
 
 let userSelectPlace = {};
 
+let place0 = {id: 0, name: "Сейчас"};
 let place1 = {id: 1, name: "Улица", pin: 14};
 let place2 = {id: 2, name: "Тамбур", pin: 12};
 let place3 = {id: 3, name: "Нагреватель", pin: 13};
-let places = [place1, place2, place3];
+let places = [place0, place1, place2, place3];
 
-let period1 = {id: 4, name: "Сейчас"};
 let period2 = {id: 5, name: "За день"};
 let period3 = {id: 6, name: "За неделю"};
 let period4 = {id: 7, name: "За месяц"};
@@ -35,7 +35,7 @@ function sendInitMessage(chatId) {
 }
 
 function sendSelectPeriodMessage(chatId) {
-    bot.sendMessage(chatId, 'Подскажи, за какой период нужно?', {
+    bot.sendMessage(chatId, 'Подскажи, за какой период нужны графики?', {
         "reply_markup": {
             "keyboard": [periods.map(i => i.name), ["Назад"]]
         }
@@ -61,8 +61,26 @@ module.exports = function (repository) {
 
             let place = _.find(places, p => p.name === msg.text);
             if (place) {
-                userSelectPlace[msg.from.username] = place;
-                sendSelectPeriodMessage(chatId)
+                if (place.id === place0.id) {
+                    let dht = repository.getDHT();
+                    dht.then(r => {
+                        let time = formatDate(r.timestamp);
+                        let chartsData = dht.getBarChartData(r.data);
+
+                        _.map(chartsData, c => {
+                            chart.buffer(c).then(i => {
+                                bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
+                            })
+                        });
+
+                        sendInitMessage(chatId);
+                    });
+
+
+                } else {
+                    userSelectPlace[msg.from.username] = place;
+                    sendSelectPeriodMessage(chatId)
+                }
             } else {
                 if (msg.text === 'Назад')
                     sendInitMessage(chatId);
@@ -73,21 +91,10 @@ module.exports = function (repository) {
                             sendInitMessage(chatId);
                         else {
                             let p = userSelectPlace[msg.from.username];
-                            if (period.id === period1.id) {
-                                let dht = repository.getDHT();
-                                dht.then(r => {
-                                    let time = formatDate(r.timestamp);
-                                    let temp = _.find(r.data, d => d.dht === p.pin);
-                                    bot.sendMessage(chatId, 'Данные на ' + time + '\r\n' + p.name + ', ' + period.name + ': температура ' + temp.t + ', влажность ' + temp.h);
+                            dht.getChartData().then(r => {
 
-                                })
-                            } else {
-                                dht.getChartData().then(r => {
-                                    chart.buffer(r[0]).then(i => {
-                                        bot.sendPhoto(chatId, i, {caption: 'График'})
-                                    })
-                                });
-                            }
+                            });
+
                         }
 
                     } else {

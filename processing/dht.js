@@ -74,7 +74,7 @@ function processItems(items) {
         datasets.push(dataset);
 
         dataset = {
-            label: 'Влажность датчика ' + sensorId,
+            label: 'Влажность датчика ' + pins[sensorId],
             backgroundColor: 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')',
             data: _.map(sortedData, item => item.humidity),
             fill: false,
@@ -112,8 +112,91 @@ function processItems(items) {
                     }]
                 }
             }
-        }, 'dht_' + sensorId + '.png')
+        })
     }
+
+    return chartData;
+}
+
+
+function getBarChartData(data) {
+
+    let labels = [];
+    let temps = [];
+    let hums = [];
+    for (let pin in pins) {
+        let pData = _.find(data, d => d.dht === pin);
+        temps.push(pData.t);
+        hums.push(pData.h);
+        labels.push(pins[pin]);
+    }
+
+    chartData = [];
+
+    chartData.push({
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: temps
+        },
+        options: {
+            responsive: false,
+            title: {
+                display: true,
+                text: 'График температуры'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Место'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Значение'
+                    }
+                }]
+            }
+        }
+
+    });
+
+
+    chartData.push({
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: hums
+        },
+        options: {
+            responsive: false,
+            title: {
+                display: true,
+                text: 'График Влажности'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Место'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Значение'
+                    }
+                }]
+            }
+        }
+
+    });
 
     return chartData;
 }
@@ -122,5 +205,7 @@ function processItems(items) {
 module.exports = {
     getChartData: function () {
         return fromFolder('./processing/2017-10-30');
-    }
+    },
+
+    getBarChartData: getBarChartData
 };
