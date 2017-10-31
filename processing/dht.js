@@ -144,26 +144,26 @@ function getBarChartData(data) {
     chartData = [];
 
     let chartOptions = {
-        plugins: {
-            afterDraw: function (chart, easing) {
-                let self = chart.config;
-
-                const chartInstance = chart.chart;
-                let ctx = chartInstance.ctx;
-                ctx.textAlign = 'center';
-                ctx.fillStyle = "rgba(0, 0, 0, 1)";
-                ctx.textBaseline = 'bottom';
-
-                self.data.datasets.forEach(function (dataset, i) {
-                    let meta = chartInstance.controller.getDatasetMeta(i);
-                    meta.data.forEach(function (bar, index) {
-                        let data = dataset.data[index];
-                        ctx.fillText(data, bar._model.x, bar._model.y - 5);
-                    });
-                });
-
-            }
-        },
+        // plugins: {
+        //     afterDraw: function (chart, easing) {
+        //         let self = chart.config;
+        //
+        //         const chartInstance = chart.chart;
+        //         let ctx = chartInstance.ctx;
+        //         ctx.textAlign = 'center';
+        //         ctx.fillStyle = "rgba(0, 0, 0, 1)";
+        //         ctx.textBaseline = 'bottom';
+        //
+        //         self.data.datasets.forEach(function (dataset, i) {
+        //             let meta = chartInstance.controller.getDatasetMeta(i);
+        //             meta.data.forEach(function (bar, index) {
+        //                 let data = dataset.data[index];
+        //                 ctx.fillText(data, bar._model.x, bar._model.y - 5);
+        //             });
+        //         });
+        //
+        //     }
+        // },
         responsive: true
     };
 
@@ -213,7 +213,8 @@ function getLineChartData(data, title) {
         let temps = _.sortBy(data[pin].t, 'time');
         let hums = _.sortBy(data[pin].h, 'time');
         labels = labels || _.map(temps, t => {
-            return t.timestamp.substring(t.timestamp.indexOf('T') + 1);
+            let timeStr = repository.getLocalDate(new Date(t.time)).toISOString();
+            return timeStr.substring(timeStr.indexOf('T') + 1, timeStr.length - 5);
         });
 
 
@@ -244,7 +245,8 @@ function getLineChartData(data, title) {
             datasets: tempDatasets
         },
         options: {
-            responsive: false,
+            plugins:{},
+            responsive: true,
             title: {
                 display: true,
                 text: 'График Температуры ' + (title ? title : '')
@@ -272,10 +274,11 @@ function getLineChartData(data, title) {
         type: 'line',
         data: {
             labels: labels,
-            datasets: tempDatasets
+            datasets: humDatasets
         },
         options: {
-            responsive: false,
+            plugins:{},
+            responsive: true,
             title: {
                 display: true,
                 text: 'График Влажности ' + (title ? title : '')

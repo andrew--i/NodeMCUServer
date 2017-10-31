@@ -268,5 +268,6 @@ module.exports = {
     save: save,
     getDHT: getDHT,
     getCurrentDate: getCurrentDate,
-    getDHTForDay: getDHTForDay
+    getDHTForDay: getDHTForDay,
+    getLocalDate: getLocalDate
 };

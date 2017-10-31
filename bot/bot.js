@@ -66,17 +66,16 @@ function sendNowPictures(repository, chatId) {
 function sendYesterdayPictures(repository, chatId) {
     let yesterdayDHT = repository.getDHTForDay();
     let yesterday = new Date(repository.getCurrentDate().getTime() - 24 * 60 * 60 * 1000);
-    let title = [yesterday.getDate(), yesterday.getMonth(), yesterday.getFullYear()].join('-');
+    let title = _.map([yesterday.getDate(), yesterday.getMonth(), yesterday.getFullYear()], normalizeNum).join('-');
     yesterdayDHT.then(r => {
-        dht.getLineChartData(r, title)
-            .then(charts => {
-                _.map(charts, c => {
-                    chart.buffer(c).then(i => {
-                        bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
-                        sendInitMessage(chatId);
-                    })
-                })
+        let charts = dht.getLineChartData(r, title)
+        _.map(charts, c => {
+            chart.buffer(c).then(i => {
+                bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
+                sendInitMessage(chatId);
             })
+        })
+
     })
 
 }
