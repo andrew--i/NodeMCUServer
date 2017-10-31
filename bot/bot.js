@@ -14,7 +14,7 @@ function isValidMessage(message) {
 
 
 let period1 = {id: 0, name: "Сейчас"};
-let period2 = {id: 5, name: "За день"};
+let period2 = {id: 5, name: "Вчера"};
 let period3 = {id: 6, name: "За неделю"};
 let period4 = {id: 7, name: "За месяц"};
 
@@ -44,6 +44,10 @@ function isNow(period) {
     return period.id === period1.id;
 }
 
+function isYesterday(period) {
+    return period.id === period2.id;
+}
+
 function sendNowPictures(repository, chatId) {
     let currentDHT = repository.getDHT();
     currentDHT.then(r => {
@@ -59,6 +63,24 @@ function sendNowPictures(repository, chatId) {
     });
 }
 
+function sendYesterdayPictures(repository, chatId) {
+    let yesterdayDHT = repository.getDHTForDay();
+    let yesterday = new Date(repository.getCurrentDate().getTime() - 24 * 60 * 60 * 1000);
+    let title = [yesterday.getDate(), yesterday.getMonth(), yesterday.getFullYear()].join('-');
+    yesterdayDHT.then(r => {
+        dht.getLineChartData(r, title)
+            .then(charts => {
+                _.map(charts, c => {
+                    chart.buffer(c).then(i => {
+                        bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
+                        sendInitMessage(chatId);
+                    })
+                })
+            })
+    })
+
+}
+
 module.exports = function (repository) {
     bot.on('message', (msg) => {
         const chatId = msg.chat.id;
@@ -68,6 +90,8 @@ module.exports = function (repository) {
             if (period) {
                 if (isNow(period)) {
                     sendNowPictures(repository, chatId);
+                } else if (isYesterday(period)) {
+                    sendYesterdayPictures(repository, chatId);
                 } else {
                     bot.sendMessage(chatId, "Еще в разработки, ожидайте позже")
                     sendInitMessage(chatId);

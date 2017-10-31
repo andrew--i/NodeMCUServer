@@ -183,39 +183,23 @@ function lastDHT() {
     return d.promise;
 }
 
-function isExistsFolder(folder) {
-    return dbx.filesListFolder({path: ''})
-        .then(res => _.find(res.entities, e => e.path_lower === folder));
-}
-
-// for tests
-function fromFolder(path) {
+function isExistsFile(path) {
     let defer = Q.defer();
-    let fs = require('fs');
-    fs.readdir(path, (err, files) => {
-        if (err) console.log(err);
-        let items = _.map(files, file => {
-            return {content: fs.readFileSync(path + '/' + file, {encoding: 'utf-8'})};
+    let folder = path.substring(0, path.lastIndexOf('/'));
+    dbx.filesListFolder({path: folder})
+        .then(res => {
+            defer.resolve(res.entries && res.entries.length > 0 && _.map(res.entries, e => e.path_lower === path));
+        })
+        .catch(err => {
+            defer.resolve(false);
         });
-        defer.resolve(items);
-    });
-    return defer.promise;
-}
-
-function toFolder(path, data) {
-    let defer = Q.defer();
-    let fs = require('fs');
-    fs.writeFile(path, JSON.stringify(data), (err) => {
-        if (err) throw err;
-        defer.resolve(data);
-    });
 
     return defer.promise;
 }
 
 function createDayArchiveBy(src, dst) {
-    // return downloadFolder(src)
-    return fromFolder('../processing/2017-10-30')
+    let defer = Q.defer();
+    downloadFolder(src)
         .then(data => {
             let flatData = _.flatMap(data, d => JSON.parse(d.content));
             let pinsData = {};
@@ -243,16 +227,18 @@ function createDayArchiveBy(src, dst) {
                 pinsAggData[pin] = {t: [], h: []};
                 for (let i = 0; i < pointsCount; i++) {
                     let time = minTime + i * step;
-                    let timeStr = getLocalDate(new Date(time)).toISOString();
-                    let timestamp = timeStr.substring(0, timeStr.indexOf('.'));
-                    pinsAggData[pin].t.push({time: time, value: tempFunc(time), timestamp: timestamp});
-                    pinsAggData[pin].h.push({time: time, value: humFunc(time), timestamp: timestamp});
+                    pinsAggData[pin].t.push({time: time, value: tempFunc(time)});
+                    pinsAggData[pin].h.push({time: time, value: humFunc(time)});
                 }
             }
             return pinsAggData;
         })
-        //todo save to dropbox
-        .then(res => toFolder('2017-10-30_archive.json', res))
+        .then(res => {
+            dbx.filesUpload({path: dst, contents: JSON.stringify(res)});
+            defer.resolve(res);
+        });
+
+    return defer.promise;
 }
 
 function getDHTForDay() {
@@ -260,14 +246,16 @@ function getDHTForDay() {
     let currentDate = getCurrentDate();
     let yesterday = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
     let folder = getFolderByDate(yesterday);
-    let archiveFolder = folder + '_archive';
-    isExistsFolder(archiveFolder)
+    let archiveFile = '/archive/day' + folder + '.json';
+    isExistsFile(archiveFile)
         .then(isExists => {
             if (isExists) {
-                downloadFolder(archiveFolder)
-                    .then(res => defer.resolve(res));
+                downloadFile(archiveFile)
+                    .then(res => {
+                        defer.resolve(JSON.parse(res.content))
+                    });
             } else {
-                createDayArchiveBy(folder, archiveFolder)
+                createDayArchiveBy(folder, archiveFile)
                     .then(res => defer.resolve(res));
             }
         });
