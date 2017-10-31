@@ -10,6 +10,11 @@ const pins =
         13: "Нагреватель"
     };
 
+const colors = {
+    14: 'rgb(255, 99, 132)',
+    12: "rgb(54, 162, 235)",
+    13: "rgb(75, 192, 192)"
+};
 
 function fromRepository() {
     let defer = Q.defer();
@@ -26,11 +31,15 @@ function fromFolder(path) {
     fs.readdir(path, (err, files) => {
         if (err) console.log(err)
         let items = _.map(files, file => {
-            return {content: fs.readFileSync(path + '/' + file, {encoding: 'utf-8'})};
+            return {content: fromFile(path + '/' + file)};
         });
         defer.resolve(processItems(items));
     });
     return defer.promise;
+}
+
+function fromFile(path) {
+    return fs.readFileSync(path, {encoding: 'utf-8'});
 }
 
 function processItems(items) {
@@ -190,10 +199,114 @@ function getBarChartData(data) {
 }
 
 
+function getLineChartData(data, title) {
+    let lineChartData = [];
+
+    let labels = undefined;
+    let tempDatasets = [];
+    let humDatasets = [];
+
+
+
+    for (let pin in data) {
+
+        let temps = _.sortBy(data[pin].t, 'time');
+        let hums = _.sortBy(data[pin].h, 'time');
+        labels = labels || _.map(temps, t => {
+            return t.timestamp.substring(t.timestamp.indexOf('T') + 1);
+        });
+
+
+        tempDatasets.push({
+            label: 'Температура датчика ' + pins[pin],
+            backgroundColor: colors[pin],
+            borderColor: colors[pin],
+            data: _.map(temps, 'value'),
+            fill: false,
+            labels: labels
+        });
+
+        humDatasets.push({
+            label: 'Влажность датчика ' + pins[pin],
+            backgroundColor: colors[pin],
+            borderColor: colors[pin],
+            data: _.map(hums, 'value'),
+            fill: false,
+            labels: labels
+        })
+
+    }
+
+    lineChartData.push({
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: tempDatasets
+        },
+        options: {
+            responsive: false,
+            title: {
+                display: true,
+                text: 'График Температуры ' + (title ? title : '')
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Время'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Значение'
+                    }
+                }]
+            }
+        }
+    });
+
+    lineChartData.push({
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: tempDatasets
+        },
+        options: {
+            responsive: false,
+            title: {
+                display: true,
+                text: 'График Влажности ' + (title ? title : '')
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Время'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Значение'
+                    }
+                }]
+            }
+        }
+    });
+
+
+    return lineChartData;
+}
+
 module.exports = {
     getChartData: function () {
         return fromFolder('./processing/2017-10-30');
     },
-
-    getBarChartData: getBarChartData
+    getBarChartData: getBarChartData,
+    getLineChartData: getLineChartData
 };

@@ -12,34 +12,20 @@ function isValidMessage(message) {
     return _.find(usernames, message.from.usernames);
 }
 
-let userSelectPlace = {};
 
-let place0 = {id: 0, name: "Сейчас"};
-let place1 = {id: 1, name: "Улица", pin: 14};
-let place2 = {id: 2, name: "Тамбур", pin: 12};
-let place3 = {id: 3, name: "Нагреватель", pin: 13};
-let places = [place0, place1, place2, place3];
-
+let period1 = {id: 0, name: "Сейчас"};
 let period2 = {id: 5, name: "За день"};
 let period3 = {id: 6, name: "За неделю"};
 let period4 = {id: 7, name: "За месяц"};
 
-let periods = [period2, period3, period4];
+let periods = [period1, period2, period3, period4];
 
 function sendInitMessage(chatId) {
     bot.sendMessage(chatId, 'Можно узнать погоду в бане', {
         "reply_markup": {
-            "keyboard": [places.map(i => i.name)]
+            "keyboard": [periods.map(i => i.name)]
         }
     });
-}
-
-function sendSelectPeriodMessage(chatId) {
-    bot.sendMessage(chatId, 'Подскажи, за какой период нужны графики?', {
-        "reply_markup": {
-            "keyboard": [periods.map(i => i.name), ["Назад"]]
-        }
-    })
 }
 
 function normalizeNum(num) {
@@ -54,53 +40,40 @@ function formatDate(str) {
         [date.getHours(), date.getMinutes(), date.getSeconds()].map(i => normalizeNum(i)).join(':')
 }
 
+function isNow(period) {
+    return period.id === period1.id;
+}
+
+function sendNowPictures(repository, chatId) {
+    let currentDHT = repository.getDHT();
+    currentDHT.then(r => {
+        let time = formatDate(r.timestamp);
+        let chartsData = dht.getBarChartData(r.data);
+
+        _.map(chartsData, c => {
+            chart.buffer(c).then(i => {
+                bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
+                sendInitMessage(chatId);
+            })
+        });
+    });
+}
+
 module.exports = function (repository) {
     bot.on('message', (msg) => {
         const chatId = msg.chat.id;
         if (isValidMessage(msg)) {
 
-            let place = _.find(places, p => p.name === msg.text);
-            if (place) {
-                if (place.id === place0.id) {
-                    let currentDHT = repository.getDHT();
-                    currentDHT.then(r => {
-                        let time = formatDate(r.timestamp);
-                        let chartsData = dht.getBarChartData(r.data);
-
-                        _.map(chartsData, c => {
-                            chart.buffer(c).then(i => {
-                                bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
-                            })
-                        });
-
-                        sendInitMessage(chatId);
-                    });
-
-
+            let period = _.find(periods, p => p.name === msg.text);
+            if (period) {
+                if (isNow(period)) {
+                    sendNowPictures(repository, chatId);
                 } else {
-                    userSelectPlace[msg.from.username] = place;
-                    sendSelectPeriodMessage(chatId)
+                    bot.sendMessage(chatId, "Еще в разработки, ожидайте позже")
+                    sendInitMessage(chatId);
                 }
             } else {
-                if (msg.text === 'Назад')
-                    sendInitMessage(chatId);
-                else {
-                    let period = _.find(periods, p => p.name === msg.text);
-                    if (period) {
-                        if (!userSelectPlace[msg.from.username])
-                            sendInitMessage(chatId);
-                        else {
-                            let p = userSelectPlace[msg.from.username];
-                            dht.getChartData().then(r => {
-
-                            });
-
-                        }
-
-                    } else {
-                        sendInitMessage(chatId)
-                    }
-                }
+                sendInitMessage(chatId);
             }
 
         }

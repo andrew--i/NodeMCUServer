@@ -4,6 +4,7 @@ const DROPBOX_TOKEN = process.env.DROPBOX_TOKEN;
 const dbx = new Dropbox({accessToken: DROPBOX_TOKEN});
 const _ = require('lodash');
 const Q = require('q');
+const interpolation = require('../processing/interpolation');
 
 function all() {
     let d = Q.defer();
@@ -55,19 +56,23 @@ function save(item) {
 }
 
 function getCurrentDate() {
-    let date = new Date(new Date().getTime() + 1000 * 60 * 60 * 3);
-    return date;
+    return getLocalDate(new Date());
+}
+
+function getLocalDate(date) {
+    return new Date(date.getTime() + 1000 * 60 * 60 * 3);
 }
 
 function getCurrentFolder() {
-    let date = getCurrentDate();
-    return '/' + date.toISOString().split('T')[0]
+    return getFolderByDate(getCurrentDate());
+}
 
-
+function getFolderByDate(date) {
+    return '/' + date.toISOString().split('T')[0];
 }
 
 function getFolderFiles(folder) {
-    var d = Q.defer();
+    let d = Q.defer();
 
     dbx.filesListFolder({path: folder})
         .then(function (response) {
@@ -85,8 +90,8 @@ function getFolderFiles(folder) {
 }
 
 function getFiles(folders) {
-    var d = Q.defer();
-    var promises = _.map(folders, function (folder) {
+    let d = Q.defer();
+    let promises = _.map(folders, function (folder) {
         return getFolderFiles(folder)
     });
 
@@ -98,14 +103,37 @@ function getFiles(folders) {
     return d.promise;
 }
 
+function downloadFolder(folder) {
+    let defer = Q.defer();
+    getFiles([folder])
+        .then(files => {
+            downloadFilesSync(files, defer, [])
+        });
+    return defer.promise;
+}
+
+function downloadFilesSync(files, defer, result) {
+    if (!files || files.length === 0) {
+        defer.resolve(result)
+    } else {
+        console.log('Download Queue size: ', files.length);
+        let file = files.pop();
+        downloadFile(file)
+            .then(c => {
+                result.push(c);
+                downloadFilesSync(files, defer, result);
+            })
+    }
+}
+
+
 function downloadFiles(files) {
-    var d = Q.defer();
+    let d = Q.defer();
     Q.all(_.map(files, function (f) {
         return downloadFile(f);
-    }))
-        .then(function (result) {
-            d.resolve(result);
-        })
+    })).then(function (result) {
+        d.resolve(result);
+    });
     return d.promise;
 }
 
@@ -155,9 +183,102 @@ function lastDHT() {
     return d.promise;
 }
 
+function isExistsFolder(folder) {
+    return dbx.filesListFolder({path: ''})
+        .then(res => _.find(res.entities, e => e.path_lower === folder));
+}
+
+// for tests
+function fromFolder(path) {
+    let defer = Q.defer();
+    let fs = require('fs');
+    fs.readdir(path, (err, files) => {
+        if (err) console.log(err);
+        let items = _.map(files, file => {
+            return {content: fs.readFileSync(path + '/' + file, {encoding: 'utf-8'})};
+        });
+        defer.resolve(items);
+    });
+    return defer.promise;
+}
+
+function toFolder(path, data) {
+    let defer = Q.defer();
+    let fs = require('fs');
+    fs.writeFile(path, JSON.stringify(data), (err) => {
+        if (err) throw err;
+        defer.resolve(data);
+    });
+
+    return defer.promise;
+}
+
+function createDayArchiveBy(src, dst) {
+    // return downloadFolder(src)
+    return fromFolder('../processing/2017-10-30')
+        .then(data => {
+            let flatData = _.flatMap(data, d => JSON.parse(d.content));
+            let pinsData = {};
+            let minTime = undefined;
+            let maxTime = undefined;
+            _.forEach(flatData, item => {
+                let time = new Date(item.timestamp).getTime();
+                minTime = minTime ? (minTime > time ? time : minTime) : time;
+                maxTime = maxTime ? (maxTime > time ? maxTime : time) : time;
+
+                _.forEach(item.data, j => {
+                    pinsData[j.dht] = pinsData[j.dht] || {t: [], h: []};
+                    pinsData[j.dht].t.push([time, parseFloat(j.t)]);
+                    pinsData[j.dht].h.push([time, parseFloat(j.h)]);
+                })
+            });
+
+            let pointsCount = 24;
+            let step = (maxTime - minTime) / (pointsCount - 1);
+
+            let pinsAggData = {};
+            for (let pin in pinsData) {
+                let tempFunc = interpolation(pinsData[pin].t);
+                let humFunc = interpolation(pinsData[pin].h);
+                pinsAggData[pin] = {t: [], h: []};
+                for (let i = 0; i < pointsCount; i++) {
+                    let time = minTime + i * step;
+                    let timeStr = getLocalDate(new Date(time)).toISOString();
+                    let timestamp = timeStr.substring(0, timeStr.indexOf('.'));
+                    pinsAggData[pin].t.push({time: time, value: tempFunc(time), timestamp: timestamp});
+                    pinsAggData[pin].h.push({time: time, value: humFunc(time), timestamp: timestamp});
+                }
+            }
+            return pinsAggData;
+        })
+        //todo save to dropbox
+        .then(res => toFolder('2017-10-30_archive.json', res))
+}
+
+function getDHTForDay() {
+    let defer = Q.defer();
+    let currentDate = getCurrentDate();
+    let yesterday = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
+    let folder = getFolderByDate(yesterday);
+    let archiveFolder = folder + '_archive';
+    isExistsFolder(archiveFolder)
+        .then(isExists => {
+            if (isExists) {
+                downloadFolder(archiveFolder)
+                    .then(res => defer.resolve(res));
+            } else {
+                createDayArchiveBy(folder, archiveFolder)
+                    .then(res => defer.resolve(res));
+            }
+        });
+
+    return defer.promise;
+}
+
 module.exports = {
     all: all,
     save: save,
     getDHT: getDHT,
-    getCurrentDate: getCurrentDate
+    getCurrentDate: getCurrentDate,
+    getDHTForDay: getDHTForDay
 };
