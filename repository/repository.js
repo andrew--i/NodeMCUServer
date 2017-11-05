@@ -188,7 +188,7 @@ function isExistsFile(path) {
     let folder = path.substring(0, path.lastIndexOf('/'));
     dbx.filesListFolder({path: folder})
         .then(res => {
-            defer.resolve(res.entries && res.entries.length > 0 && _.map(res.entries, e => e.path_lower === path));
+            defer.resolve(res.entries && res.entries.length > 0 && _.filter(res.entries, e => e.path_lower === path).length > 0);
         })
         .catch(err => {
             defer.resolve(false);
@@ -271,3 +271,6 @@ module.exports = {
     getDHTForDay: getDHTForDay,
     getLocalDate: getLocalDate
 };
+
+
+getDHTForDay();
