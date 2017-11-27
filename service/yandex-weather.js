@@ -7,7 +7,7 @@ const location = process.env.WEATHER_LOCATION;
 
 
 function getForecast() {
-    const url = ['https://yandex.ru/pogoda?', location].join();
+    const url = 'https://yandex.ru/pogoda?' + location;
     console.log("URL IS: " + url);
     return axios.get(url)
         .then(response => {
