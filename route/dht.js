@@ -1,5 +1,5 @@
 var blocks = [];
-const maxBlockCount = 30;
+const maxBlockCount = 2;
 
 module.exports = {
 
