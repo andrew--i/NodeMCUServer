@@ -15,10 +15,9 @@ function isValidMessage(message) {
 
 let period1 = {id: 0, name: "Сейчас"};
 let period2 = {id: 5, name: "Вчера"};
-let period3 = {id: 6, name: "За неделю"};
-let period4 = {id: 7, name: "За месяц"};
+let period3 = {id: 6, name: "Прогноз"};
 
-let periods = [period1, period2, period3, period4];
+let periods = [period2, period1, period3];
 
 function sendInitMessage(chatId) {
     bot.sendMessage(chatId, 'Можно узнать погоду в бане', {
@@ -48,6 +47,10 @@ function isYesterday(period) {
     return period.id === period2.id;
 }
 
+function isForecast(period) {
+    return period.id === period3.id;
+}
+
 function sendNowPictures(repository, chatId) {
     let currentDHT = repository.getDHT();
     currentDHT.then(r => {
@@ -68,7 +71,7 @@ function sendYesterdayPictures(repository, chatId) {
     let yesterday = new Date(repository.getCurrentDate().getTime() - 24 * 60 * 60 * 1000);
     let title = _.map([yesterday.getDate(), yesterday.getMonth(), yesterday.getFullYear()], normalizeNum).join('-');
     yesterdayDHT.then(r => {
-        let charts = dht.getLineChartData(r, title)
+        let charts = dht.getLineChartData(r, title);
         _.map(charts, c => {
             chart.buffer(c).then(i => {
                 bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
@@ -80,7 +83,22 @@ function sendYesterdayPictures(repository, chatId) {
 
 }
 
-module.exports = function (repository) {
+function sendForecastMessage(weatherService, chatId) {
+    const forecast = weatherService.getForecast();
+    const head = 'Прогноз погоды на 10 дней от [Яндекса](https://yandex.ru/pogoda)';
+    const body = _.map(forecast, i =>
+        '*' + i.date + '*\n\t*Днем*:\t`' + i.day + '`\n\t*Ночью*:\t`' + i.night + '`\n\t*Осадки*:\t`' + i.desc + '`');
+
+    bot.sendMessage(chatId, [head, body].join('\n\n'), {
+        parse_mode: "markdown",
+        "reply_markup": {
+            "keyboard": [periods.map(i => i.name)]
+        }
+    });
+
+}
+
+module.exports = function (repository, weatherService) {
     bot.on('message', (msg) => {
         const chatId = msg.chat.id;
         if (isValidMessage(msg)) {
@@ -91,8 +109,10 @@ module.exports = function (repository) {
                     sendNowPictures(repository, chatId);
                 } else if (isYesterday(period)) {
                     sendYesterdayPictures(repository, chatId);
+                } else if (isForecast(period)) {
+                    sendForecastMessage(weatherService, chatId)
                 } else {
-                    bot.sendMessage(chatId, "Еще в разработки, ожидайте позже")
+                    bot.sendMessage(chatId, "Еще в разработки, ожидайте позже");
                     sendInitMessage(chatId);
                 }
             } else {

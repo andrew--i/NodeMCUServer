@@ -10,11 +10,13 @@
     "node": "6.11.1"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "body-parser": "^1.17.2",
     "canvas": "^1.6.7",
     "chart.js": "^2.6.0",
     "chartjs": "^0.3.24",
     "chartjs-node": "^1.6.0",
+    "cheerio": "^1.0.0-rc.2",
     "dropbox": "^2.5.7",
     "express": "4.15.2",
     "lodash": "^4.17.4",

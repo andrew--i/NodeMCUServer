@@ -1,8 +1,9 @@
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const app = express();
-const repository = require('./repository/repository')
+const repository = require('./repository/repository');
+const weatherService = require('./service/yandex-weather');
 
 app.use(bodyParser.json());
 app.use(morgan('short'));
@@ -10,7 +11,8 @@ app.use(morgan('short'));
 //setup port
 app.set('port', (process.env.PORT || 9999));
 
-const bot = require('./bot/bot')(repository);
+const bot = require('./bot/bot');
+bot(repository, weatherService);
 
 //init routes
 const dhtRoute = require('./route/dht');
