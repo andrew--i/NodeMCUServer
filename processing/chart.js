@@ -36,6 +36,7 @@ module.exports = {
         chartNode.on('beforeDraw', function (Chartjs) {
             Chartjs.defaults.global.defaultFontSize = 16;
             Chartjs.defaults.global.defaultFontStyle = 'bold';
+            Chartjs.pluginService.clear();
 
         });
 

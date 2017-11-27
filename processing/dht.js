@@ -237,27 +237,6 @@ function getLineChartData(data, title) {
 
     }
 
-    let plugins = {
-        afterDraw: function (chart, easing) {
-            let self = chart.config;
-
-            const chartInstance = chart.chart;
-            let ctx = chartInstance.ctx;
-            ctx.textAlign = 'center';
-            ctx.fillStyle = "rgba(0, 0, 0, 1)";
-            ctx.textBaseline = 'bottom';
-
-            self.data.datasets.forEach(function (dataset, i) {
-                let meta = chartInstance.controller.getDatasetMeta(i);
-                meta.data.forEach(function (bar, index) {
-                    let data = dataset.data[index];
-                    ctx.fillText('', bar._model.x, bar._model.y - 5);
-                });
-            });
-
-        }
-    }
-
 
     lineChartData.push({
         type: 'line',
@@ -266,7 +245,6 @@ function getLineChartData(data, title) {
             datasets: tempDatasets
         },
         options: {
-            plugins: plugins,
             responsive: true,
             title: {
                 display: true,
@@ -298,7 +276,6 @@ function getLineChartData(data, title) {
             datasets: humDatasets
         },
         options: {
-            plugins: plugins,
             responsive: true,
             title: {
                 display: true,
