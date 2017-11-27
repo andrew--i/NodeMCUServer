@@ -60,7 +60,6 @@ function sendNowPictures(repository, chatId) {
         _.map(chartsData, c => {
             chart.buffer(c).then(i => {
                 bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
-                sendInitMessage(chatId);
             })
         });
     });
@@ -75,7 +74,6 @@ function sendYesterdayPictures(repository, chatId) {
         _.map(charts, c => {
             chart.buffer(c).then(i => {
                 bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
-                sendInitMessage(chatId);
             })
         })
 
@@ -93,10 +91,7 @@ function sendForecastMessage(weatherService, chatId) {
 
 
             bot.sendMessage(chatId, [head, body.join('\n\n')].join('\n\n'), {
-                parse_mode: "markdown",
-                "reply_markup": {
-                    "keyboard": [periods.map(i => i.name)]
-                }
+                parse_mode: "markdown"
             });
         });
 
