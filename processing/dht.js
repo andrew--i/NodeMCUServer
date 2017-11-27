@@ -169,8 +169,10 @@ function getBarChartData(data) {
     };
 
     let ctx = [
-        {label: 'График Температуры', data: temps},
-        {label: 'График Влажности', data: hums}];
+        {label: 'График Температуры', data: temps}
+        //,
+        //{label: 'График Влажности', data: hums}
+        ];
 
     return _.map(ctx, c => {
         return {
@@ -270,7 +272,7 @@ function getLineChartData(data, title) {
         }
     });
 
-    lineChartData.push({
+    /*lineChartData.push({
         type: 'line',
         data: {
             labels: labels,
@@ -299,7 +301,7 @@ function getLineChartData(data, title) {
                 }]
             }
         }
-    });
+    });*/
 
 
     return lineChartData;
