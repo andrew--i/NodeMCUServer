@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const _ = require('lodash');
 
 //format:  lat=<some float value>&lon=<some float value>
-const location = process.env("WEATHER_LOCATION");
+const location = process.env.WEATHER_LOCATION;
 
 
 function getForecast() {
