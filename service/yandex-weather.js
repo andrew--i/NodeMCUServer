@@ -7,7 +7,9 @@ const location = process.env.WEATHER_LOCATION;
 
 
 function getForecast() {
-    return axios.get(['https://yandex.ru/pogoda?', location].join())
+    const url = ['https://yandex.ru/pogoda?', location].join();
+    console.log("URL IS: " + url);
+    return axios.get(url)
         .then(response => {
             const $ = cheerio.load(response.data);
             const days = _.map($('.time.forecast-briefly__date'), d => d.children[0].data);
