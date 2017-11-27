@@ -159,7 +159,7 @@ function getBarChartData(data) {
                     meta.data.forEach(function (bar, index) {
                         let data = dataset.data[index];
                         const sign = Math.sign(parseFloat(data) + 0.000001);
-                        ctx.fillText(data, bar._model.x, bar._model.y + sign * (sign < 0 ? 5 : 15));
+                        ctx.fillText(data, bar._model.x, bar._model.y + sign * (sign < 0 ? 5 : 25));
                     });
                 });
 
