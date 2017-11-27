@@ -84,17 +84,19 @@ function sendYesterdayPictures(repository, chatId) {
 }
 
 function sendForecastMessage(weatherService, chatId) {
-    const forecast = weatherService.getForecast();
-    const head = 'Прогноз погоды на 10 дней от [Яндекса](https://yandex.ru/pogoda)';
-    const body = _.map(forecast, i =>
-        '*' + i.date + '*\n\t*Днем*:\t`' + i.day + '`\n\t*Ночью*:\t`' + i.night + '`\n\t*Осадки*:\t`' + i.desc + '`');
+    weatherService.getForecast()
+        .then(forecast => {
+            const head = 'Прогноз погоды на 10 дней от [Яндекса](https://yandex.ru/pogoda)';
+            const body = _.map(forecast, i =>
+                '*' + i.date + '*\n\t*Днем*:\t`' + i.day + '`\n\t*Ночью*:\t`' + i.night + '`\n\t*Осадки*:\t`' + i.desc + '`');
 
-    bot.sendMessage(chatId, [head, body].join('\n\n'), {
-        parse_mode: "markdown",
-        "reply_markup": {
-            "keyboard": [periods.map(i => i.name)]
-        }
-    });
+            bot.sendMessage(chatId, [head, body].join('\n\n'), {
+                parse_mode: "markdown",
+                "reply_markup": {
+                    "keyboard": [periods.map(i => i.name)]
+                }
+            });
+        });
 
 }
 
