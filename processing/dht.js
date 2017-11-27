@@ -144,26 +144,26 @@ function getBarChartData(data) {
     chartData = [];
 
     let chartOptions = {
-        // plugins: {
-        //     afterDraw: function (chart, easing) {
-        //         let self = chart.config;
-        //
-        //         const chartInstance = chart.chart;
-        //         let ctx = chartInstance.ctx;
-        //         ctx.textAlign = 'center';
-        //         ctx.fillStyle = "rgba(0, 0, 0, 1)";
-        //         ctx.textBaseline = 'bottom';
-        //
-        //         self.data.datasets.forEach(function (dataset, i) {
-        //             let meta = chartInstance.controller.getDatasetMeta(i);
-        //             meta.data.forEach(function (bar, index) {
-        //                 let data = dataset.data[index];
-        //                 ctx.fillText(data, bar._model.x, bar._model.y - 5);
-        //             });
-        //         });
-        //
-        //     }
-        // },
+        plugins: {
+            afterDraw: function (chart, easing) {
+                let self = chart.config;
+
+                const chartInstance = chart.chart;
+                let ctx = chartInstance.ctx;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = "rgba(0, 0, 0, 1)";
+                ctx.textBaseline = 'bottom';
+
+                self.data.datasets.forEach(function (dataset, i) {
+                    let meta = chartInstance.controller.getDatasetMeta(i);
+                    meta.data.forEach(function (bar, index) {
+                        let data = dataset.data[index];
+                        ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                    });
+                });
+
+            }
+        },
         responsive: true
     };
 
@@ -207,13 +207,12 @@ function getLineChartData(data, title) {
     let humDatasets = [];
 
 
-
     for (let pin in data) {
 
         let temps = _.sortBy(data[pin].t, 'time');
         let hums = _.sortBy(data[pin].h, 'time');
         labels = labels || _.map(temps, t => {
-            let timeStr = repository.getLocalDate(new Date(t.time)).toISOString();
+            let timeStr = new Date(t.time).toISOString();
             return timeStr.substring(timeStr.indexOf('T') + 1, timeStr.length - 5);
         });
 
@@ -238,6 +237,28 @@ function getLineChartData(data, title) {
 
     }
 
+    let plugins = {
+        afterDraw: function (chart, easing) {
+            let self = chart.config;
+
+            const chartInstance = chart.chart;
+            let ctx = chartInstance.ctx;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = "rgba(0, 0, 0, 1)";
+            ctx.textBaseline = 'bottom';
+
+            self.data.datasets.forEach(function (dataset, i) {
+                let meta = chartInstance.controller.getDatasetMeta(i);
+                meta.data.forEach(function (bar, index) {
+                    let data = dataset.data[index];
+                    ctx.fillText('', bar._model.x, bar._model.y - 5);
+                });
+            });
+
+        }
+    }
+
+
     lineChartData.push({
         type: 'line',
         data: {
@@ -245,7 +266,7 @@ function getLineChartData(data, title) {
             datasets: tempDatasets
         },
         options: {
-            plugins:{},
+            plugins: plugins,
             responsive: true,
             title: {
                 display: true,
@@ -277,7 +298,7 @@ function getLineChartData(data, title) {
             datasets: humDatasets
         },
         options: {
-            plugins:{},
+            plugins: plugins,
             responsive: true,
             title: {
                 display: true,
@@ -307,9 +328,6 @@ function getLineChartData(data, title) {
 }
 
 module.exports = {
-    getChartData: function () {
-        return fromFolder('./processing/2017-10-30');
-    },
     getBarChartData: getBarChartData,
     getLineChartData: getLineChartData
 };
