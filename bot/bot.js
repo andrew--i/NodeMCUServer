@@ -87,12 +87,8 @@ function sendForecastMessage(weatherService, chatId) {
     weatherService.getForecast()
         .then(forecast => {
             const head = 'Прогноз погоды на 10 дней от [Яндекса](https://yandex.ru/pogoda)';
-            const body = _.map(forecast, (item, index) => {
-                let d = new Date(new Date().getTime() + 24 * 60 * 60 * 1000 * (index + 1));
-                const shortWeekdayName = d.toLocaleDateString(process.env.LOCALE, {
-                    weekday: 'short'
-                });
-                return '*' + item.date + '(' + shortWeekdayName + ')*\t\t\t`' + item.day + '/' + item.night + '\t\t' + item.desc + '`'
+            const body = _.map(forecast, item => {
+                return '*' + item.date + '(' + item.dayOfWeek + ')*\t\t\t`' + item.day + '/' + item.night + '\t\t' + item.desc + '`'
             });
 
 
