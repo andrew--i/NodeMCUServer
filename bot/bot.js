@@ -88,9 +88,9 @@ function sendForecastMessage(weatherService, chatId) {
         .then(forecast => {
             const head = 'Прогноз погоды на 10 дней от [Яндекса](https://yandex.ru/pogoda)';
             const body = _.map(forecast, i =>
-                '*' + i.date + '*\n\t*Днем*:\t`' + i.day + '`\n\t*Ночью*:\t`' + i.night + '`\n\t*Осадки*:\t`' + i.desc + '`');
+                '*' + i.date + '*\n\t\t\t```Днем:\t\t\t`' + i.day + '`\n\t\t\tНочью:\t\t\t`' + i.night + '`\n\t\t\tОсадки:\t\t\t`' + i.desc + '` ```');
 
-            bot.sendMessage(chatId, [head, body].join('\n\n'), {
+            bot.sendMessage(chatId, [head, body.join('\n')].join('\n\n'), {
                 parse_mode: "markdown",
                 "reply_markup": {
                     "keyboard": [periods.map(i => i.name)]

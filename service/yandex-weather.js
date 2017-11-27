@@ -9,7 +9,7 @@ const location = process.env.WEATHER_LOCATION;
 function getForecast() {
     return axios.get(['https://yandex.ru/pogoda?', location].join())
         .then(response => {
-            const $ = cheerio.load(response.data)
+            const $ = cheerio.load(response.data);
             const days = _.map($('.time.forecast-briefly__date'), d => d.children[0].data);
             const dayTemps = _.map($('.temp.forecast-briefly__temp.forecast-briefly__temp_day > .temp__value'), d => d.children[0].data);
             const nightTemps = _.map($('.temp.forecast-briefly__temp.forecast-briefly__temp_night > .temp__value'), d => d.children[0].data);
