@@ -4,6 +4,9 @@ const morgan = require('morgan');
 const app = express();
 const repository = require('./repository/repository');
 const weatherService = require('./service/yandex-weather');
+const schedule = require('./schedule/calculate_yesterday');
+
+schedule.schedule();
 
 app.use(bodyParser.json());
 app.use(morgan('short'));
