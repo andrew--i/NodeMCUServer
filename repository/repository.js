@@ -83,7 +83,7 @@ function getFolderFiles(folder) {
       });
       d.resolve(files);
     }).catch(function (error) {
-    return [];
+    d.resolve([]);
   });
 
   return d.promise;
@@ -271,6 +271,3 @@ module.exports = {
   getDHTForDay: getDHTForDay,
   getLocalDate: getLocalDate
 };
-
-
-getDHTForDay();
