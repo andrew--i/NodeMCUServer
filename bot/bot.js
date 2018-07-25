@@ -6,6 +6,7 @@ const dht = require('../processing/dht');
 const chart = require('../processing/chart');
 
 const usernames = process.env.TELEGRAM_USERNAMES ? process.env.TELEGRAM_USERNAMES.split(',') : undefined;
+console.log('usernames: ' + usernames);
 
 function isValidMessage(message) {
     if(!usernames || usernames.length === 0)
