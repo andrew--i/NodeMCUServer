@@ -5,7 +5,7 @@ const _ = require('lodash');
 const dht = require('../processing/dht');
 const chart = require('../processing/chart');
 
-const usernames = JSON.parse(process.env.TELEGRAM_USERNAMES);
+const usernames = process.env.TELEGRAM_USERNAMES ? process.env.TELEGRAM_USERNAMES.split(',') : undefined;
 
 function isValidMessage(message) {
     if(!usernames || usernames.length === 0)
