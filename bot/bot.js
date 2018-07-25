@@ -64,13 +64,7 @@ function sendNowPictures(repository, chatId) {
 
     _.map(chartsData, c => {
       chart.buffer(c).then(i => {
-        const fileOptions = {
-          // Explicitly specify the file name.
-          filename: 'data_at_' + time + '.png',
-          // Explicitly specify the MIME type.
-          contentType: 'image/png',
-        };
-        bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time}, fileOptions)
+        bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
       })
     });
   });

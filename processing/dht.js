@@ -3,7 +3,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const Q = require('q');
 
-let pins, colors;
+let pins, colors, bgColors, borderColors;
 
 if (process.env.IS_HOME) {
   pins =
@@ -17,6 +17,16 @@ if (process.env.IS_HOME) {
     13: "rgb(75, 192, 192)"
   };
 
+  bgColors = [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)'
+  ]
+
+  borderColors = [
+    'rgba(255,99,132,1)',
+    'rgba(255, 206, 86, 1)'
+  ];
+
 } else {
   pins =
     {
@@ -24,6 +34,17 @@ if (process.env.IS_HOME) {
       12: "Тамбур",
       13: "Нагреватель"
     };
+  bgColors = [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 206, 86, 0.2)'
+  ];
+
+  borderColors = [
+    'rgba(255,99,132,1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)'
+  ];
 
   colors = {
     14: 'rgb(255, 99, 132)',
@@ -182,7 +203,18 @@ function getBarChartData(data) {
 
       }
     },
-    responsive: true
+    responsive: false,
+    animation: false,
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true
+        }
+      }]
+    },
+    tooltips: {
+      mode: 'label'
+    }
   };
 
   let ctx = [
@@ -199,17 +231,8 @@ function getBarChartData(data) {
         datasets: [{
           data: c.data,
           label: c.label,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)'
-
-          ],
-          borderColor: [
-            'rgba(255,99,132,1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)'
-          ],
+          backgroundColor: bgColors,
+          borderColor: borderColors,
           borderWidth: 1
         }]
       },
@@ -288,37 +311,6 @@ function getLineChartData(data, title) {
       }
     }
   });
-
-  /*lineChartData.push({
-      type: 'line',
-      data: {
-          labels: labels,
-          datasets: humDatasets
-      },
-      options: {
-          responsive: true,
-          title: {
-              display: true,
-              text: 'График Влажности ' + (title ? title : '')
-          },
-          scales: {
-              xAxes: [{
-                  display: true,
-                  scaleLabel: {
-                      display: true,
-                      labelString: 'Время'
-                  }
-              }],
-              yAxes: [{
-                  display: true,
-                  scaleLabel: {
-                      display: true,
-                      labelString: 'Значение'
-                  }
-              }]
-          }
-      }
-  });*/
 
 
   return lineChartData;
