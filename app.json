@@ -1,6 +1,0 @@
-{
-  "name": "Node MCU backend",
-  "description": "",
-  "keywords": ["node", "express", "heroku"],
-  "image": "heroku/nodejs"
-}

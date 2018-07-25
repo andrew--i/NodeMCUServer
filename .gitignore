@@ -8,4 +8,4 @@ boot_*.py
 boot.py
 !*booter.py
 NodeMCU
-Dockerfile
+Dockerfile*
