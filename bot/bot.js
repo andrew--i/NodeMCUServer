@@ -23,7 +23,7 @@ let period3 = {id: 6, name: "Прогноз"};
 let periods = [period2, period1, period3];
 
 function sendInitMessage(chatId) {
-    bot.sendMessage(chatId, 'Можно узнать погоду в бане', {
+    bot.sendMessage(chatId, 'Можно узнать температуру', {
         "reply_markup": {
             "keyboard": [periods.map(i => i.name)]
         }
