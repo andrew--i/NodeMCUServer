@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.BOT_TOKEN;
-const bot = new TelegramBot(token, {polling: true});
+const bot = new TelegramBot(token, {polling: true, filepath: false});
 const _ = require('lodash');
 const dht = require('../processing/dht');
 const chart = require('../processing/chart');
@@ -64,7 +64,13 @@ function sendNowPictures(repository, chatId) {
 
     _.map(chartsData, c => {
       chart.buffer(c).then(i => {
-        bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
+        const fileOptions = {
+          // Explicitly specify the file name.
+          filename: 'data_at_' + time + '.png',
+          // Explicitly specify the MIME type.
+          contentType: 'image/png',
+        };
+        bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time}, fileOptions)
       })
     });
   });
