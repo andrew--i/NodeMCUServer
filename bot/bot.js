@@ -8,6 +8,8 @@ const chart = require('../processing/chart');
 const usernames = JSON.parse(process.env.TELEGRAM_USERNAMES);
 
 function isValidMessage(message) {
+    if(!usernames || usernames.length === 0)
+        return true;
     console.log('check user: ' + message.from.username);
     return _.find(usernames, message.from.username);
 }
