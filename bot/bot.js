@@ -9,7 +9,7 @@ const usernames = JSON.parse(process.env.TELEGRAM_USERNAMES);
 
 function isValidMessage(message) {
     console.log('check user: ' + message.from.username);
-    return _.find(usernames, message.from.usernames);
+    return _.find(usernames, message.from.username);
 }
 
 
