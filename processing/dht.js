@@ -8,8 +8,8 @@ let pins, colors, bgColors, borderColors;
 if (process.env.IS_HOME) {
   pins =
     {
-      12: "Лоджия",
-      13: "Ящик"
+      12: "Ящик 1",
+      13: "Ящик 2"
     };
 
   colors = {
