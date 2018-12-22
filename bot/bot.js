@@ -1,6 +1,19 @@
+//proxy
+// const AgentHTTPS = require('socks5-https-client/lib/Agent');
+
+
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.BOT_TOKEN;
-const bot = new TelegramBot(token, {polling: true, filepath: false});
+const bot = new TelegramBot(token, {
+  polling: true, filepath: false,
+  // request: {
+  //   agentClass: AgentHTTPS,
+  //   agentOptions: {
+  //     socksHost: 'localhost',
+  //     socksPort: 9050
+  //   }
+  // }
+});
 const _ = require('lodash');
 const dht = require('../processing/dht');
 const chart = require('../processing/chart');
@@ -56,33 +69,28 @@ function isForecast(period) {
   return period.id === period3.id;
 }
 
-function sendNowPictures(repository, chatId) {
-  let currentDHT = repository.getDHT();
-  currentDHT.then(r => {
-    let time = formatDate(r.timestamp);
-    let chartsData = dht.getBarChartData(r.data);
+async function sendNowPictures(repository, chatId) {
+  let currentDHT = await repository.getDHT();
 
-    _.map(chartsData, c => {
-      chart.buffer(c).then(i => {
-        bot.sendPhoto(chatId, i, {caption: 'График на момент ' + time})
-      })
-    });
-  });
+  let time = formatDate(currentDHT.timestamp);
+  let chartsData = dht.getBarChartData(currentDHT.data);
+
+  for (const data of chartsData) {
+    let image = await chart.buffer(data);
+    bot.sendPhoto(chatId, image, {caption: 'График на момент ' + time})
+  }
 }
 
-function sendYesterdayPictures(repository, chatId) {
-  let yesterdayDHT = repository.getDHTForDay();
+async function sendYesterdayPictures(repository, chatId) {
   let yesterday = new Date(repository.getCurrentDate().getTime() - 24 * 60 * 60 * 1000);
   let title = _.map([yesterday.getDate(), yesterday.getMonth(), yesterday.getFullYear()], normalizeNum).join('-');
-  yesterdayDHT.then(r => {
-    let charts = dht.getLineChartData(r, title);
-    _.map(charts, c => {
-      chart.buffer(c).then(i => {
-        bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
-      })
-    })
+  let yesterdayDHT = await repository.getDHTForDay();
+  let charts = dht.getLineChartData(yesterdayDHT, title);
 
-  })
+  for (const c of charts) {
+    let i = await chart.buffer(c);
+    bot.sendPhoto(chatId, i, {caption: 'График за вчера ( ' + title + ' )'});
+  }
 
 }
 
@@ -103,6 +111,7 @@ function sendForecastMessage(weatherService, chatId) {
 }
 
 module.exports = function (repository, weatherService) {
+
   bot.on('message', (msg) => {
     const chatId = msg.chat.id;
     if (isValidMessage(msg)) {

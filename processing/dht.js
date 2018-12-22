@@ -173,10 +173,12 @@ function getBarChartData(data) {
   let hums = [];
 
   for (let pin in pins) {
-    let pData = _.find(data, d => d.dht === parseInt(pin));
-    temps.push(parseFloat(pData.t));
-    hums.push(parseFloat(pData.h));
-    labels.push(pins[pin]);
+    let pData = _.find(data, d => d && d.dht === parseInt(pin));
+    if(pData) {
+      temps.push(parseFloat(pData.t));
+      hums.push(parseFloat(pData.h));
+      labels.push(pins[pin]);
+    }
   }
 
   chartData = [];
@@ -251,6 +253,8 @@ function getLineChartData(data, title) {
 
 
   for (let pin in data) {
+    if(!data[pin])
+      continue;
 
     let temps = _.sortBy(data[pin].t, 'time');
     let hums = _.sortBy(data[pin].h, 'time');

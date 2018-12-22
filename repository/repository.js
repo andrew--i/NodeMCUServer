@@ -197,70 +197,60 @@ function isExistsFile(path) {
   return defer.promise;
 }
 
-function createDayArchiveBy(src, dst) {
-  let defer = Q.defer();
-  downloadFolder(src)
-    .then(data => {
-      let flatData = _.flatMap(data, d => JSON.parse(d.content));
-      let pinsData = {};
-      let minTime = undefined;
-      let maxTime = undefined;
-      _.forEach(flatData, item => {
-        let time = new Date(item.timestamp).getTime();
-        minTime = minTime ? (minTime > time ? time : minTime) : time;
-        maxTime = maxTime ? (maxTime > time ? maxTime : time) : time;
+async function createDayArchiveBy(src, dst) {
+  let data = await downloadFolder(src);
 
-        _.forEach(item.data, j => {
-          pinsData[j.dht] = pinsData[j.dht] || {t: [], h: []};
-          pinsData[j.dht].t.push([time, parseFloat(j.t)]);
-          pinsData[j.dht].h.push([time, parseFloat(j.h)]);
-        })
-      });
+  let flatData = _.flatMap(data, d => JSON.parse(d.content));
+  let pinsData = {};
+  let minTime = undefined;
+  let maxTime = undefined;
+  _.forEach(flatData, item => {
+    let time = new Date(item.timestamp).getTime();
+    minTime = minTime ? (minTime > time ? time : minTime) : time;
+    maxTime = maxTime ? (maxTime > time ? maxTime : time) : time;
 
-      let pointsCount = 24;
-      let step = (maxTime - minTime) / (pointsCount - 1);
-
-      let pinsAggData = {};
-      for (let pin in pinsData) {
-        let tempFunc = interpolation(pinsData[pin].t);
-        let humFunc = interpolation(pinsData[pin].h);
-        pinsAggData[pin] = {t: [], h: []};
-        for (let i = 0; i < pointsCount; i++) {
-          let time = minTime + i * step;
-          pinsAggData[pin].t.push({time: time, value: tempFunc(time)});
-          pinsAggData[pin].h.push({time: time, value: humFunc(time)});
-        }
+    _.forEach(item.data, j => {
+      if(j) {
+        pinsData[j.dht] = pinsData[j.dht] || {t: [], h: []};
+        pinsData[j.dht].t.push([time, parseFloat(j.t)]);
+        pinsData[j.dht].h.push([time, parseFloat(j.h)]);
       }
-      return pinsAggData;
     })
-    .then(res => {
-      dbx.filesUpload({path: dst, contents: JSON.stringify(res)});
-      defer.resolve(res);
-    });
+  });
 
-  return defer.promise;
+  let pointsCount = 24;
+  let step = (maxTime - minTime) / (pointsCount - 1);
+
+  let pinsAggData = {};
+  for (let pin in pinsData) {
+    let tempFunc = interpolation(pinsData[pin].t);
+    let humFunc = interpolation(pinsData[pin].h);
+    pinsAggData[pin] = {t: [], h: []};
+    for (let i = 0; i < pointsCount; i++) {
+      let time = minTime + i * step;
+      pinsAggData[pin].t.push({time: time, value: tempFunc(time)});
+      pinsAggData[pin].h.push({time: time, value: humFunc(time)});
+    }
+  }
+
+  await dbx.filesUpload({path: dst, contents: JSON.stringify(pinsAggData)});
+
+  return pinsAggData;
 }
 
-function getDHTForDay() {
-  let defer = Q.defer();
+async function getDHTForDay() {
   let currentDate = getCurrentDate();
   let yesterday = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
   let folder = getFolderByDate(yesterday);
   let archiveFile = '/archive/day' + folder + '.json';
-  isExistsFile(archiveFile)
-    .then(isExists => {
-      if (isExists) {
-        downloadFile(archiveFile)
-          .then(res => {
-            defer.resolve(JSON.parse(res.content))
-          });
-      } else {
-        createDayArchiveBy(folder, archiveFile)
-          .then(res => defer.resolve(res));
-      }
-    });
+  let isExists = await isExistsFile(archiveFile);
 
-  return defer.promise;
+  if (isExists) {
+    let res = await downloadFile(archiveFile);
+    return JSON.parse(res.content);
+  } else {
+    return await createDayArchiveBy(folder, archiveFile);
+  }
 }
 
 module.exports = {
